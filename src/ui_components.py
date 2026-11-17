@@ -1,0 +1,405 @@
+"""
+LoanWise AI - UI Components & Custom Fintech Styling
+Provides custom CSS, modern fintech metric cards, Plotly charts,
+and visual status indicators for the Streamlit dashboard.
+"""
+
+from typing import Dict, Any, List
+import plotly.graph_objects as go
+import plotly.express as px
+import pandas as pd
+import streamlit as st
+
+# Custom Fintech CSS
+FINTECH_CUSTOM_CSS = """
+<style>
+    /* Google Fonts Import */
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
+
+    html, body, [class*="css"] {
+        font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    /* Global Card Styles */
+    .lw-card {
+        background: #FFFFFF;
+        border: 1px solid #E2E8F0;
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.05);
+        margin-bottom: 20px;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .lw-card:hover {
+        box-shadow: 0 10px 24px -4px rgba(15, 23, 42, 0.08);
+    }
+
+    /* Hero / Header Banner */
+    .lw-hero {
+        background: linear-gradient(135deg, #0F172A 0%, #1E293B 50%, #0F766E 100%);
+        color: #FFFFFF;
+        border-radius: 18px;
+        padding: 32px 36px;
+        margin-bottom: 24px;
+        box-shadow: 0 12px 28px -6px rgba(15, 23, 42, 0.25);
+    }
+    .lw-hero h1 {
+        font-size: 2.2rem;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        margin-bottom: 8px;
+        color: #FFFFFF;
+    }
+    .lw-hero p {
+        font-size: 1.05rem;
+        color: #94A3B8;
+        max-width: 720px;
+        line-height: 1.5;
+        margin-bottom: 0px;
+    }
+    .lw-tag {
+        display: inline-block;
+        background: rgba(16, 185, 129, 0.18);
+        color: #34D399;
+        font-size: 0.8rem;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        padding: 4px 12px;
+        border-radius: 20px;
+        border: 1px solid rgba(52, 211, 153, 0.3);
+        margin-bottom: 12px;
+    }
+
+    /* Metric Stat Box */
+    .lw-stat-box {
+        background: #F8FAFC;
+        border: 1px solid #E2E8F0;
+        border-radius: 14px;
+        padding: 18px 20px;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+    .lw-stat-label {
+        font-size: 0.82rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: #64748B;
+        margin-bottom: 6px;
+    }
+    .lw-stat-val {
+        font-size: 1.65rem;
+        font-weight: 800;
+        color: #0F172A;
+        font-family: 'JetBrains Mono', monospace;
+        letter-spacing: -0.02em;
+    }
+    .lw-stat-sub {
+        font-size: 0.8rem;
+        color: #64748B;
+        margin-top: 4px;
+    }
+
+    /* Decision Banner */
+    .lw-decision-approved {
+        background: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%);
+        border: 1.5px solid #10B981;
+        border-radius: 16px;
+        padding: 24px;
+        margin-bottom: 20px;
+    }
+    .lw-decision-rejected {
+        background: linear-gradient(135deg, #FEF2F2 0%, #FEE2E2 100%);
+        border: 1.5px solid #EF4444;
+        border-radius: 16px;
+        padding: 24px;
+        margin-bottom: 20px;
+    }
+
+    /* Academic Disclaimer Banner */
+    .lw-disclaimer {
+        background: #FFFBEB;
+        border-left: 4px solid #F59E0B;
+        border-radius: 8px;
+        padding: 12px 18px;
+        margin: 20px 0;
+        font-size: 0.85rem;
+        color: #92400E;
+        line-height: 1.45;
+    }
+
+    /* AI Advice Box */
+    .lw-ai-box {
+        background: #FFFFFF;
+        border: 1px solid #CBD5E1;
+        border-radius: 16px;
+        padding: 28px;
+        margin-top: 16px;
+        box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.06);
+    }
+</style>
+"""
+
+
+def apply_fintech_styles():
+    """Injects custom fintech CSS styles into Streamlit."""
+    st.markdown(FINTECH_CUSTOM_CSS, unsafe_allow_html=True)
+
+
+def render_hero_header():
+    """Renders the top branding header with project tags."""
+    st.markdown(
+        """
+        <div class="lw-hero">
+            <span class="lw-tag">College CIA-2 Project &bull; AI Underwriting Prototype</span>
+            <h1>LoanWise AI</h1>
+            <p>Smart Financial Profiling, Machine Learning Loan Eligibility Assessment, and Generative AI Advisory System.</p>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+
+def render_disclaimer():
+    """Renders academic disclaimer."""
+    st.markdown(
+        """
+        <div class="lw-disclaimer">
+            <strong>&bull; Academic Notice:</strong> This software is an educational prototype developed for college CIA-2 examination.
+            The predictions and risk classifications are generated by a statistical machine learning model and do not constitute
+            a legally binding credit sanction or banking commitment.
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+
+def render_metric_card(label: str, value: str, subtext: str = "", help_text: str = ""):
+    """Renders clean fintech metric box."""
+    sub_html = f'<div class="lw-stat-sub">{subtext}</div>' if subtext else ""
+    st.markdown(
+        f"""
+        <div class="lw-stat-box">
+            <div class="lw-stat-label">{label}</div>
+            <div class="lw-stat-val">{value}</div>
+            {sub_html}
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+
+def render_decision_banner(is_eligible: bool, approval_prob: float, risk_level: str, badge_color: str):
+    """Renders visual banner showing model approval decision and risk tier."""
+    if is_eligible:
+        container_class = "lw-decision-approved"
+        title_color = "#065F46"
+        icon = "APPROVED / ELIGIBLE"
+        status_sub = "Applicant meets baseline underwriting criteria."
+    else:
+        container_class = "lw-decision-rejected"
+        title_color = "#991B1B"
+        icon = "NOT ELIGIBLE / ELEVATED RISK"
+        status_sub = "Application indicates elevated default risk under current financial parameters."
+
+    st.markdown(
+        f"""
+        <div class="{container_class}">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                <div>
+                    <div style="font-size: 0.85rem; font-weight: 700; letter-spacing: 0.05em; color: {title_color}; text-transform: uppercase;">
+                        Model Evaluation Outcome
+                    </div>
+                    <div style="font-size: 1.8rem; font-weight: 800; color: {title_color}; margin: 4px 0;">
+                        {icon}
+                    </div>
+                    <div style="font-size: 0.95rem; color: #334155;">{status_sub}</div>
+                </div>
+                <div style="text-align: right; min-width: 140px;">
+                    <div style="display: inline-block; background: {badge_color}; color: #FFFFFF; font-weight: 700; padding: 6px 16px; border-radius: 20px; font-size: 0.9rem; margin-bottom: 6px;">
+                        {risk_level.upper()} RISK
+                    </div>
+                    <div style="font-size: 1.15rem; font-weight: 800; color: #0F172A; font-family: 'JetBrains Mono', monospace;">
+                        {approval_prob}% <span style="font-size: 0.8rem; font-weight: 500; color: #64748B;">confidence</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+
+def create_loan_breakdown_pie(principal: float, total_interest: float) -> go.Figure:
+    """Creates modern donut chart showing Principal vs Interest share."""
+    fig = go.Figure(
+        data=[
+            go.Pie(
+                labels=["Principal Amount", "Total Interest Payable"],
+                values=[principal, total_interest],
+                hole=0.62,
+                marker=dict(colors=["#0F172A", "#10B981"]),
+                textinfo="percent",
+                hoverinfo="label+value+percent",
+                textfont=dict(size=13, family="Plus Jakarta Sans", weight="bold"),
+            )
+        ]
+    )
+    fig.update_layout(
+        showlegend=True,
+        legend=dict(orientation="h", yanchor="bottom", y=-0.2, xanchor="center", x=0.5),
+        margin=dict(l=10, r=10, t=20, b=10),
+        height=280,
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)"
+    )
+    return fig
+
+
+def create_dti_gauge_chart(dti_ratio: float) -> go.Figure:
+    """Creates a calibrated gauge meter for Debt-to-Income / FOIR."""
+    clamped_dti = min(100.0, max(0.0, dti_ratio))
+    fig = go.Figure(
+        go.Indicator(
+            mode="gauge+number",
+            value=clamped_dti,
+            number={"suffix": "%", "font": {"size": 36, "family": "JetBrains Mono"}},
+            title={"text": "Debt-to-Income (FOIR)", "font": {"size": 16, "family": "Plus Jakarta Sans"}},
+            gauge={
+                "axis": {"range": [0, 100], "tickwidth": 1, "tickcolor": "#94A3B8"},
+                "bar": {"color": "#0F172A", "thickness": 0.28},
+                "bgcolor": "white",
+                "borderwidth": 1,
+                "bordercolor": "#E2E8F0",
+                "steps": [
+                    {"range": [0, 35], "color": "#D1FAE5"},    # Safe / Low
+                    {"range": [35, 50], "color": "#FEF3C7"},   # Moderate
+                    {"range": [50, 100], "color": "#FEE2E2"}   # Critical / High
+                ],
+                "threshold": {
+                    "line": {"color": "#EF4444", "width": 4},
+                    "thickness": 0.75,
+                    "value": 50.0
+                }
+            }
+        )
+    )
+    fig.update_layout(
+        margin=dict(l=20, r=20, t=40, b=10),
+        height=240,
+        paper_bgcolor="rgba(0,0,0,0)"
+    )
+    return fig
+
+
+def create_cash_flow_bar_chart(disposable_summary: Dict[str, float]) -> go.Figure:
+    """Renders waterfall-style bar chart of monthly income vs obligations and surplus."""
+    categories = ["Total Income", "Debt Obligations", "Living Expenses", "Net Cash Surplus"]
+    amounts = [
+        disposable_summary["total_income"],
+        disposable_summary["total_debt_obligations"],
+        disposable_summary["estimated_living_expenses"],
+        disposable_summary["net_surplus"]
+    ]
+    colors = ["#3B82F6", "#EF4444", "#F59E0B", "#10B981" if disposable_summary["net_surplus"] >= 0 else "#DC2626"]
+
+    fig = go.Figure(
+        data=[
+            go.Bar(
+                x=categories,
+                y=amounts,
+                marker_color=colors,
+                text=[f"₹{v:,.0f}" for v in amounts],
+                textposition="auto",
+                textfont=dict(family="JetBrains Mono", size=12)
+            )
+        ]
+    )
+    fig.update_layout(
+        title="Monthly Cash Flow Allocation (₹)",
+        title_font=dict(size=14, family="Plus Jakarta Sans"),
+        margin=dict(l=10, r=10, t=35, b=10),
+        height=280,
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        yaxis=dict(gridcolor="#E2E8F0")
+    )
+    return fig
+
+
+def create_feature_importance_chart(feature_importances: Dict[str, float]) -> go.Figure:
+    """Plots horizontal bar chart of top ML feature importances for academic transparency."""
+    top_items = list(feature_importances.items())[:8]
+    names = [k.replace("_", " ").title() for k, v in reversed(top_items)]
+    values = [v * 100.0 for k, v in reversed(top_items)]
+
+    fig = go.Figure(
+        go.Bar(
+            x=values,
+            y=names,
+            orientation="h",
+            marker=dict(color="#0F766E"),
+            text=[f"{v:.1f}%" for v in values],
+            textposition="outside",
+            textfont=dict(family="JetBrains Mono", size=11)
+        )
+    )
+    fig.update_layout(
+        title="Model Underwriting Factor Weights (Gini Importance)",
+        title_font=dict(size=14, family="Plus Jakarta Sans"),
+        xaxis=dict(title="Importance Weight (%)", gridcolor="#E2E8F0"),
+        margin=dict(l=10, r=40, t=40, b=10),
+        height=320,
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)"
+    )
+    return fig
+
+
+def create_confusion_matrix_heatmap(raw_matrix: List[List[int]]) -> go.Figure:
+    """Renders confusion matrix heatmap for test set evaluation."""
+    labels = ["Rejected (0)", "Approved (1)"]
+    z = raw_matrix  # [[TN, FP], [FN, TP]]
+    annotations = []
+
+    label_texts = [
+        [f"True Negatives<br><b>{z[0][0]}</b>", f"False Positives<br><b>{z[0][1]}</b>"],
+        [f"False Negatives<br><b>{z[1][0]}</b>", f"True Positives<br><b>{z[1][1]}</b>"]
+    ]
+
+    for i in range(2):
+        for j in range(2):
+            annotations.append(
+                dict(
+                    x=labels[j],
+                    y=labels[i],
+                    text=label_texts[i][j],
+                    showarrow=False,
+                    font=dict(family="Plus Jakarta Sans", size=13, color="white" if z[i][j] > 100 else "#0F172A")
+                )
+            )
+
+    fig = go.Figure(
+        data=go.Heatmap(
+            z=z,
+            x=labels,
+            y=labels,
+            colorscale=[[0, "#E2E8F0"], [0.2, "#93C5FD"], [1.0, "#1E3A8A"]],
+            showscale=False
+        )
+    )
+    fig.update_layout(
+        title="Test Set Confusion Matrix (500 Unseen Applicants)",
+        title_font=dict(size=14, family="Plus Jakarta Sans"),
+        xaxis=dict(title="Predicted Class"),
+        yaxis=dict(title="Actual Ground Truth", autorange="reversed"),
+        annotations=annotations,
+        margin=dict(l=10, r=10, t=40, b=10),
+        height=280,
+        paper_bgcolor="rgba(0,0,0,0)"
+    )
+    return fig
+

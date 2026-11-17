@@ -1,0 +1,67 @@
+{
+    "model_type": "RandomForestClassifier",
+    "n_estimators": 150,
+    "train_samples": 2000,
+    "test_samples": 500,
+    "accuracy": 0.902,
+    "precision": 0.9219,
+    "recall": 0.8986,
+    "f1_score": 0.9101,
+    "roc_auc": 0.9774,
+    "confusion_matrix": {
+        "true_negatives": 203,
+        "false_positives": 21,
+        "false_negatives": 28,
+        "true_positives": 248,
+        "raw_matrix": [
+            [
+                203,
+                21
+            ],
+            [
+                28,
+                248
+            ]
+        ]
+    },
+    "feature_importances": {
+        "dti_ratio": 0.4817,
+        "credit_score": 0.1537,
+        "proposed_emi": 0.0904,
+        "existing_emi": 0.0513,
+        "loan_to_income_ratio": 0.0511,
+        "total_monthly_income": 0.0307,
+        "loan_tenure_months": 0.029,
+        "requested_amount": 0.0248,
+        "monthly_income": 0.023,
+        "age": 0.017,
+        "coapplicant_income": 0.0142,
+        "work_experience": 0.0141,
+        "loan_purpose_Business Loan": 0.005,
+        "employment_type_Salaried": 0.0042,
+        "employment_type_Self-Employed": 0.0032,
+        "loan_purpose_Personal Loan": 0.0026,
+        "loan_purpose_Education Loan": 0.0019,
+        "loan_purpose_Home Loan": 0.0019
+    },
+    "features_list": {
+        "numeric": [
+            "age",
+            "work_experience",
+            "monthly_income",
+            "coapplicant_income",
+            "total_monthly_income",
+            "credit_score",
+            "existing_emi",
+            "requested_amount",
+            "loan_tenure_months",
+            "proposed_emi",
+            "dti_ratio",
+            "loan_to_income_ratio"
+        ],
+        "categorical": [
+            "employment_type",
+            "loan_purpose"
+        ]
+    }
+}
